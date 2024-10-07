@@ -49,7 +49,8 @@ var DiceView={
 				value: DiceGame.name,
 				class: 'input is-rounded',
 				 oninput: function (e) {
-					 DiceGame.name=e.target.value},
+					 DiceGame.name=e.target.value
+					 Score.loadMyList(DiceGame.name);},
 				 }),
 			m('div',{class:'level'},[
 			 m('label',{class:'level-item'},"turn:"+DiceGame.turn),
@@ -67,6 +68,7 @@ var DiceView={
  
 var Score = {
 	    list: [],
+    	myScores: [],
 	    loadList: function() {
 	        return m.request({
 	            method: "GET",
@@ -87,8 +89,19 @@ var Score = {
 	        .then(function(result) {
 	        	console.log("got:",result)
 	        	Score.loadList()
+				Score.loadMyList(name)
 	        })
-	    }
+	    },
+		loadMyList: function(name) {
+			return m.request({
+				method: "GET",
+				url: "_ah/api/myApi/v1/myscores/" + name
+			})
+			.then(function(result) {
+				Score.myScores = result.items; 
+				console.log("got my scores:", result.items);
+			});
+		}
 	}
 
 var ScoreView = {
@@ -112,6 +125,27 @@ var ScoreView = {
   }
 }
 
+var MyScoreView = {
+    oninit: Score.loadMyList(DiceGame.name),
+    view: function() {
+        return m('div', [
+            m('div', { class: 'subtitle' }, "My Top 10 Scores"),
+            m('table', { class: 'table is-striped' }, [
+                m('tr', [
+                    m('th', { width: "20px" }, "Name"),
+                    m('th', { width: "50px" }, "Score"),
+                ]),
+                Score.myScores.map(function(item) {
+                    return m("tr", [
+                        m('td', m('label', item.properties.name)),
+                        m('td', m('label', item.properties.score)),
+                    ]);
+                })
+            ])
+        ]);
+    }
+};
+
 var Hello = {
    view: function() {
    	return m('div', {class:'container'}, [
@@ -119,6 +153,7 @@ var Hello = {
            m('div',{class: 'tile is-ancestor'},[
                m("div", {class: 'tile'}, m('div',{class:'tile is-child box'},m(DiceView))),
                m("div", {class: 'tile'}, m('div',{class:'tile is-child box'},m(ScoreView))),
+			   m("div", {class: 'tile'}, m('div',{class:'tile is-child box'},m(MyScoreView))),
            ])
        ])
    }
