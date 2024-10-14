@@ -18,11 +18,17 @@
 
 <script>	
 
+var userName = localStorage.getItem('user_name');
+console.log(userName);
+if (!userName) {
+  window.location.href = "glogin-new.html";
+}
+
 var DiceGame={
   turn : 0,
   d1 : 1,
   d2 : 1,
-  name : 'spock',
+  name : userName,
   score : 0,
 
   play: function() {
@@ -41,6 +47,8 @@ var DiceGame={
    }
  } // DiceGame
 
+
+
 var DiceView={
 	view: function() {
 		return m('div', [
@@ -49,9 +57,11 @@ var DiceView={
 				value: DiceGame.name,
 				class: 'input is-rounded',
 				 oninput: function (e) {
-					 DiceGame.name=e.target.value
-					 Score.loadMyList(DiceGame.name);},
-				 }),
+					// DiceGame.name=e.target.value
+					// Score.loadMyList(DiceGame.name);},
+                 },
+                 disabled: true,
+            }),
 			m('div',{class:'level'},[
 			 m('label',{class:'level-item'},"turn:"+DiceGame.turn),
 			 m('label',{class:'level-item'},"score:"+DiceGame.score),
@@ -60,6 +70,7 @@ var DiceView={
 			m('label',{class:'label'},"Dice 2:"+DiceGame.d2),
 			m('button',{
 				class: 'button is-link',
+                disabled: !DiceGame.name,
 				onclick: function(e) {DiceGame.play()}
 			    },"play"),
 		])

@@ -4,21 +4,24 @@
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <div id="g_id_onload"
-         data-client_id="927375242383-jm45ei76rdsfv7tmjv58tcsjjpvgkdje.apps.googleusercontent.com"
+         data-client_id="455134098418-6kjsf6p4cse1cucin57d4lo24c8755b6.apps.googleusercontent.com"
          data-callback="handleCredentialResponse">
     </div>
     <div class="g_id_signin" data-type="standard"></div>
 
     <p id="toto"></p> 
 
+    <!-- Bouton pour se déconnecter -->
+    <button id="logout-btn" onclick="logout()" style="display:none;">Se déconnecter</button>
+
     <script>
     function handleCredentialResponse(response) {
-        console.log("callback called:"+response.credential)
-        // decodeJwtResponse() is a custom function defined by you
-        // to decode the credential response.
+        console.log("callback called:" + response.credential);
+
         const responsePayload = jwt_decode(response.credential);
-   
+
         console.log("ID: " + responsePayload.sub);
         console.log('Full Name: ' + responsePayload.name);
         console.log('Given Name: ' + responsePayload.given_name);
@@ -26,13 +29,32 @@
         console.log("Image URL: " + responsePayload.picture);
         console.log("Email: " + responsePayload.email);
 
-
         const url = "_ah/api/myApi/v1/Hello"+'?access_token=' + response.credential
         fetch(url).then(response => response.text()).then(data => document.getElementById('toto').innerHTML = data)
+        localStorage.setItem('user_name', responsePayload.name);
+        
+    }
 
-     }
+    // Fonction de déconnexion
+    function logout() {
+        localStorage.removeItem('user_name');
+        google.accounts.id.disableAutoSelect();
+        
+        document.getElementById('toto').innerHTML = "Vous êtes déconnecté.";
+ 
+    }
+
+    // Vérification du stockage local pour afficher/masquer le bouton de déconnexion
+    function checkUserLoggedIn() {
+      const userName = localStorage.getItem('user_name');
+      if (userName) {
+        // Si un utilisateur est connecté, afficher le bouton de déconnexion
+        document.getElementById('logout-btn').style.display = 'block';
+      }
+    }
+
+    // Vérifier l'état de connexion au chargement de la page
+    window.onload = checkUserLoggedIn;
     </script>
-    
-
   </body>
 </html>
